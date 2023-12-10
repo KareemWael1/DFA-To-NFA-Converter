@@ -1,6 +1,7 @@
 import json
 from collections import deque
-from NFA_testing import NFA_ex0, NFA_ex1, NFA_ex2, NFA_ex3
+from NFA_testing import NFA_ex0, NFA_ex1, NFA_ex2, NFA_ex3, NFA_ex4
+
 
 def epsilon_closure(states, transitions):
     epsilon_closure_set = set(states)
@@ -10,13 +11,14 @@ def epsilon_closure(states, transitions):
         current_state = queue.popleft()
 
         if "ε" in transitions[current_state]:
-            epsilon_closure_set.update(transitions[current_state]["ε"])
-
             for state in transitions[current_state]["ε"]:
                 if state not in epsilon_closure_set:
                     queue.append(state)
 
+            epsilon_closure_set.update(transitions[current_state]["ε"])
+
     return tuple(sorted(list(epsilon_closure_set)))
+
 
 def move(states, symbol, transitions):
     result = set()
@@ -26,6 +28,7 @@ def move(states, symbol, transitions):
             result.update(transitions[state][symbol])
 
     return tuple(sorted(list(result)))
+
 
 def nfa_to_dfa(nfa):
     # Print the original NFA
@@ -83,4 +86,4 @@ def nfa_to_dfa(nfa):
 
 
 # Convert NFA to DFA
-dfa_json = nfa_to_dfa(NFA_ex1)
+dfa_json = nfa_to_dfa(NFA_ex4)
