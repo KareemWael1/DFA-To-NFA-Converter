@@ -4,16 +4,21 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import networkx as nx
 import numpy as np
 import nx_pylab as nxm
+import nfa_tracing_methods as nfa
 
 
 def save_and_display_text(root):
     global curr_state
     curr_state = 1
+    global curr_states_nfa
+    curr_states_nfa = {1}
+
     def save_text():
         global char_counter
         char_counter = 1
-        global curr_state
+        global curr_state , curr_states_nfa
         curr_state = 1
+        curr_states_nfa = {1}
         global input_text
         input_text = textbox.get("1.0", "end-1c")
         label.config(state="normal")
@@ -23,18 +28,12 @@ def save_and_display_text(root):
         label.config(state="disabled")
 
     def advance_color(end):
-        global char_counter, ax, canvas, ret,curr_state
-        graph_data = [
-            [(1, 2), "a,b"],
-            [(2, 3), "a"],
-            [(3, 4), "b"],
-            [(4, 1), "a"],
-            [(4, 2), "b"]
-        ]
+        global char_counter, ax, canvas, ret, curr_state
+        global graph_data, curr_states_nfa
         edge_idx = -1
 
         for idx, data in enumerate(graph_data):
-            if data[0][0] == curr_state and input_text[end-1] in data[1]:
+            if data[0][0] == curr_state and input_text[end - 1] in data[1]:
                 edge_idx = idx
                 curr_state = data[0][1]
                 break
@@ -56,8 +55,29 @@ def save_and_display_text(root):
             weight = edge[1]
             #     G.add_node(node[0])
             graph.add_edge(node[0], node[1], weight=weight)
-            trace(graph, [-1, 1, 2, 0, 0, 0, 0], ax, canvas, edge_colors)
 
+        ## make graph for nfa
+        graph_nfa = nx.DiGraph()
+        for edge in nfa_graph:
+            node = edge[0]
+            graph_nfa.add_node(node[0])
+            graph_nfa.add_node(node[1])
+        # Add edges and weights to the graph
+        for edge in nfa_graph:
+            node = edge[0]
+            weight = edge[1]
+            graph_nfa.add_edge(node[0], node[1], weight=weight)
+        edges, nxt_states = nfa.get_next_states_from_set_of_states(curr_states_nfa, input_text[end - 1], nfa_graph)
+        curr_states_nfa = nxt_states
+        edge_colors_nfa = []
+        for node in graph_nfa.edges:
+            if (node[0], node[1]) in edges:
+                edge_colors_nfa.append('red')
+            else:
+                edge_colors_nfa.append('black')
+
+        trace(graph, state, ax, canvas, edge_colors)
+        trace(graph_nfa, nfa_state, ax2, canvas2, edge_colors_nfa)
         char_counter = 1 + char_counter
         highlight_text(tag_name='tag1', lineno=1, start_char=0, end_char=end, fg_color='red')
 
@@ -197,7 +217,7 @@ def trace(graph, state, ax, canvas, edge_colors):
 
     # Draw the directed graph with edge labels
     pos = nx.circular_layout(graph)
-    nx.draw(graph, pos, ax=ax, with_labels=True, node_color=colors, node_size=500, arrows=True, edge_color=edge_colors)
+    nx.draw(graph, pos, ax=ax, with_labels=True, node_color=colors, node_size=500, arrows=True, edge_color=edge_colors,width=2.0)
     edge_labels = {(u, v): graph.edges[u, v]['weight'] for u, v in graph.edges()}
     label_pos = {}
     for edge in graph.edges():
@@ -209,25 +229,24 @@ def trace(graph, state, ax, canvas, edge_colors):
     # Refresh canvas
     canvas.draw()
 
-
+# 0 normal , 1 final , 2 start
 # inputs to the program
 graph_data = [
-    [(1, 2), "a,b"],
-    [(2, 3), "a"],
-    [(3, 4), "b"],
-    [(4, 1), "a"],
-    [(4, 2), "b"]
+    [(1, 1), "b"],
+    [(1, 2), "a"],
+    [(2, 2), "a"],
+    [(2, 3), "b"],
+    [(3, 2), "a"],
+    [(3, 1), "b"]
 ]
-state = [0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+state = [0, 2, 0, 1]
 
 nfa_graph = [
-    [(1, 2), "a,b"],
-    [(2, 3), "a"],
-    [(3, 4), "b"],
-    [(4, 1), "a"],
-    [(4, 2), "b"]
+    [(1, 1), "a,b"],
+    [(1, 2), "a"],
+    [(2, 3), "b"],
 ]
-nfa_state = [0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0]
+nfa_state = [0, 2, 0, 1]
 
 
 # -------------------------
@@ -276,7 +295,7 @@ def draw_nfa(graph, ax, canvas, state):
 
 
 def main():
-    global ax, canvas  # Define ax and canvas globally
+    global ax, canvas, ax2, canvas2  # Define ax and canvas globally
 
     # Create the GUI window
     root = tk.Tk()
