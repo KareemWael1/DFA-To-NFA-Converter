@@ -7,7 +7,7 @@ import networkx as nx
 
 # Your existing functions and data
 def update_view(graph):
-    global ax, canvas, state  # Access the ax and canvas variables from the global scope
+    global ax, canvas, dfa_state  # Access the ax and canvas variables from the global scope
     # Clear the previous plot
     ax.clear()
 
@@ -36,7 +36,7 @@ def update_view(graph):
 
 
 # inputs to the program
-graph_data = [
+dfa_graph = [
     [(1, 2), "a,b"],
     [(2, 3), "a"],
     [(2, 2), "b"],
@@ -47,7 +47,7 @@ graph_data = [
     [(5, 1), "a"],
     [(5, 5), "a,b"]
 ]
-state = [-1, 2, 0, 0, 1, 0]
+dfa_state = [-1, 2, 0, 0, 1, 0]
 
 next_count = 0
 
@@ -87,7 +87,7 @@ class NetworkGraph(QMainWindow):
         graph = nx.DiGraph()
 
         # Add edges and weights to the graph
-        for edge in graph_data:
+        for edge in dfa_graph:
             node = edge[0]
             weight = edge[1]
             #     G.add_node(node[0])
@@ -98,7 +98,7 @@ class NetworkGraph(QMainWindow):
         global next_count
         graph = nx.DiGraph()
 
-        for edge in graph_data:
+        for edge in dfa_graph:
             node = edge[0]
             graph.add_node(node[0])
             graph.add_node(node[0])
@@ -106,7 +106,7 @@ class NetworkGraph(QMainWindow):
         if next_count == 0:
             update_view(graph)
         else:
-            for edge in graph_data:
+            for edge in dfa_graph:
                 node = edge[0]
                 w = edge[1]
                 if node[0] <= next_count:

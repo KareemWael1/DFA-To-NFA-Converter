@@ -83,7 +83,3 @@ def nfa_to_dfa(nfa):
     print(json.dumps(dfa, indent=2))
 
     return dfa
-
-
-# Convert NFA to DFA
-dfa_json = nfa_to_dfa(NFA_ex4)

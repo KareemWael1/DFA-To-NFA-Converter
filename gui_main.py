@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import networkx as nx
 import numpy as np
+import controller
 import nx_pylab as nxm
 import nfa_tracing_methods as nfa
 
@@ -16,7 +17,7 @@ def save_and_display_text(root):
     def save_text():
         global char_counter
         char_counter = 1
-        global curr_state , curr_states_nfa
+        global curr_state, curr_states_nfa
         curr_state = 1
         curr_states_nfa = {1}
         global input_text
@@ -29,28 +30,28 @@ def save_and_display_text(root):
 
     def advance_color(end):
         global char_counter, ax, canvas, ret, curr_state
-        global graph_data, curr_states_nfa
+        global dfa_graph, curr_states_nfa
         edge_idx = -1
 
-        for idx, data in enumerate(graph_data):
+        for idx, data in enumerate(dfa_graph):
             if data[0][0] == curr_state and input_text[end - 1] in data[1]:
                 edge_idx = idx
                 curr_state = data[0][1]
                 break
         edge_colors = []
-        for i in range(len(graph_data)):
+        for i in range(len(dfa_graph)):
             if i != edge_idx:
                 edge_colors.append('black')
             else:
                 edge_colors.append('red')
 
         graph = nx.DiGraph()
-        for edge in graph_data:
+        for edge in dfa_graph:
             node = edge[0]
             graph.add_node(node[0])
             graph.add_node(node[1])
         # Add edges and weights to the graph
-        for edge in graph_data:
+        for edge in dfa_graph:
             node = edge[0]
             weight = edge[1]
             #     G.add_node(node[0])
@@ -76,7 +77,7 @@ def save_and_display_text(root):
             else:
                 edge_colors_nfa.append('black')
 
-        trace(graph, state, ax, canvas, edge_colors)
+        trace(graph, dfa_state, ax, canvas, edge_colors)
         trace(graph_nfa, nfa_state, ax2, canvas2, edge_colors_nfa)
         char_counter = 1 + char_counter
         highlight_text(tag_name='tag1', lineno=1, start_char=0, end_char=end, fg_color='red')
@@ -105,37 +106,57 @@ def save_and_display_text(root):
     advance_button.pack(padx=10, pady=5)
 
 
-def save_input(states_entry, transitions_entry, final_state_entry, start_state_entry, sigma_entry, window):
-    states = states_entry.get()
-    transitions = transitions_entry.get()
-    final_state = final_state_entry.get()
-    start_state = start_state_entry.get()
-    sigma = sigma_entry.get()
+def save_input(states_entry, sigma_entry, start_state_entry, final_state_entry, transitions_entry, window):
+    global dfa_graph
+    global dfa_state
+    global nfa_graph
+    global nfa_state
+
+    states = states_entry.get("1.0", "end-1c")
+    sigma = sigma_entry.get("1.0", "end-1c")
+    transitions = transitions_entry.get("1.0", "end-1c")
+    start_state = start_state_entry.get("1.0", "end-1c")
+    final_states = final_state_entry.get("1.0", "end-1c")
 
     # Process and save the input
     print("States:", states)
-    print("Transitions:", transitions)
-    print("Final State:", final_state)
-    print("Start State:", start_state)
     print("Sigma:", sigma)
+    print("Transitions:\n", transitions)
+    print("Start State:", start_state)
+    print("Final State:", final_states)
+
+    nfa_graph, nfa_state, dfa_graph, states = controller.process_input(
+        states, sigma, transitions, start_state, final_states
+    )
 
     # Close the window after saving
     window.destroy()
+
+    # draw the NFA
+    draw_nfa(graph=nfa_graph, ax=ax2, canvas=canvas2, state=nfa_state)
+
+
+def clear_text(entry_fields):
+    for entry in entry_fields:
+        entry.delete("1.0", tk.END)  # Clear content from each Text widget
 
 
 def open_new_window(root):
     new_window = tk.Toplevel(root)
     new_window.title("NFA Definition")
 
-    labels = ["States:", "Transitions:", "Final State:", "Start State:", "Sigma:"]
-    entry_texts = ["State1,State2,State3", "s1 s2 alpha, s2 s3 alpha", "State1", "State1", "A,B,C"]
+    labels = ["States:", "Sigma:", "Start State:", "Final States:", "Transitions:"]
+    entry_texts = ["{q0, q1, q2}", "{0, 1}", "q0", "{q2}", "(q0, 0) = {q0}\n"
+                                                           "(q0, 1) = {q0, q1}\n"
+                                                           "(q1, 0) = {q2}\n"
+                                                           "(q1, 1) = {q2}\n"
+                                                           "(q2, 0) = {q2}"]
 
     entry_fields = []
     for i, label_text in enumerate(labels):
         label = tk.Label(new_window, text=label_text, font=("Arial", 14))  # Increase font size
         label.grid(row=i, column=0, padx=10, pady=5)
-
-        entry_text = tk.Entry(new_window, font=("Arial", 12))  # Increase font size
+        entry_text = tk.Text(new_window, font=("Arial", 12), height=get_height(i), width=30)
         entry_text.insert(tk.END, entry_texts[i])
         entry_text.grid(row=i, column=1, padx=10, pady=5)
         entry_fields.append(entry_text)
@@ -143,6 +164,16 @@ def open_new_window(root):
     save_button = tk.Button(new_window, text="Save Input", font=("Arial", 12),
                             command=lambda: save_input(*entry_fields, new_window))  # Increase font size
     save_button.grid(row=len(labels), columnspan=2, pady=10)
+
+    clear_button = tk.Button(new_window, text="Clear Input", font=("Arial", 12),
+                             command=lambda: clear_text(entry_fields))
+    clear_button.grid(row=len(labels) + 1, columnspan=2, pady=10)
+
+
+def get_height(i):
+    if i == 4:
+        return 20
+    return 1
 
 
 def zoom_in():
@@ -217,7 +248,8 @@ def trace(graph, state, ax, canvas, edge_colors):
 
     # Draw the directed graph with edge labels
     pos = nx.circular_layout(graph)
-    nx.draw(graph, pos, ax=ax, with_labels=True, node_color=colors, node_size=500, arrows=True, edge_color=edge_colors,width=2.0)
+    nx.draw(graph, pos, ax=ax, with_labels=True, node_color=colors, node_size=500, arrows=True, edge_color=edge_colors,
+            width=2.0)
     edge_labels = {(u, v): graph.edges[u, v]['weight'] for u, v in graph.edges()}
     label_pos = {}
     for edge in graph.edges():
@@ -229,24 +261,14 @@ def trace(graph, state, ax, canvas, edge_colors):
     # Refresh canvas
     canvas.draw()
 
+
 # 0 normal , 1 final , 2 start
 # inputs to the program
-graph_data = [
-    [(1, 1), "b"],
-    [(1, 2), "a"],
-    [(2, 2), "a"],
-    [(2, 3), "b"],
-    [(3, 2), "a"],
-    [(3, 1), "b"]
-]
-state = [0, 2, 0, 1]
+dfa_graph = []
+dfa_state = {}
 
-nfa_graph = [
-    [(1, 1), "a,b"],
-    [(1, 2), "a"],
-    [(2, 3), "b"],
-]
-nfa_state = [0, 2, 0, 1]
+nfa_graph = []
+nfa_state = {}
 
 
 # -------------------------
@@ -273,7 +295,7 @@ def draw_next(ax, canvas, state):
     global next_count
     graph = nx.DiGraph()
 
-    for edge in graph_data:
+    for edge in dfa_graph:
         node = edge[0]
         graph.add_node(node[0])
         graph.add_node(node[1])
@@ -281,7 +303,7 @@ def draw_next(ax, canvas, state):
     if next_count == 0:
         update_view(graph, ax, canvas, state)
     else:
-        for edge in graph_data:
+        for edge in dfa_graph:
             node = edge[0]
             w = edge[1]
             if node[0] <= next_count:
@@ -317,8 +339,8 @@ def main():
     canvas_widget2.config(borderwidth=2, relief=tk.SOLID)
 
     # Button to update the view
-    update_button = tk.Button(root, text="Next step", command=lambda: draw_next(ax, canvas, state))
-    final_button = tk.Button(root, text="Final DFA", command=lambda: final(ax, canvas, state, graph_data))
+    update_button = tk.Button(root, text="Next step", command=lambda: draw_next(ax, canvas, dfa_state))
+    final_button = tk.Button(root, text="Final DFA", command=lambda: final(ax, canvas, dfa_state, dfa_graph))
     update_button.pack()
     final_button.pack()
     zoom_in_button = tk.Button(root, text="trace a string", command=lambda: save_and_display_text(root))
@@ -331,7 +353,7 @@ def main():
 
     # Initially, update the view
     empty_graph = nx.DiGraph()
-    update_view(empty_graph, ax, canvas, state)
+    update_view(empty_graph, ax, canvas, dfa_state)
     draw_nfa(graph=nfa_graph, ax=ax2, canvas=canvas2, state=nfa_state)
     # Start the GUI event loop
     root.mainloop()
