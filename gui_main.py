@@ -125,7 +125,7 @@ def save_input(states_entry, sigma_entry, start_state_entry, final_state_entry, 
     print("Start State:", start_state)
     print("Final State:", final_states)
 
-    nfa_graph, nfa_state, dfa_graph, states = controller.process_input(
+    nfa_graph, nfa_state, dfa_graph, dfa_state = controller.process_input(
         states, sigma, transitions, start_state, final_states
     )
 

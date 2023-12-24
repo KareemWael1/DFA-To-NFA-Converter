@@ -7,10 +7,13 @@ def process_input(states, sigma, transitions, start_state, final_states):
            "transitions": extract_transitions(transitions),
            "start_state": start_state,
            "accept_states": final_states.strip('{}').split(', ')}
+    print(nfa)
     dfa = NFA_to_DFA.nfa_to_dfa(nfa)
+    dfa = process_output(dfa)
     print(dfa)
     nfa_graph = get_graph(nfa)
     dfa_graph = get_graph(dfa)
+    print(nfa_graph)
     print(dfa_graph)
     return nfa_graph[0], nfa_graph[1], dfa_graph[0], dfa_graph[1]
 
@@ -22,8 +25,11 @@ def get_graph(automaton):
     all_transitions = []
     for from_state, symbols in transitions.items():
         for symbol, to_states in symbols.items():
-            for to_state in to_states:
-                all_transitions.append(((from_state, to_state), symbol))
+            if type(to_states) is str:
+                all_transitions.append(((from_state, to_states), symbol))
+            else:
+                for to_state in to_states:
+                    all_transitions.append(((from_state, to_state), symbol))
 
     # Remove duplicates
     unique_transitions = []
@@ -72,3 +78,27 @@ def extract_transitions(transition_lines):
         result[state][symbol] = transitions.split(', ')
 
     return result
+
+
+def process_output(dfa):
+    # Convert states, start_state, and accept_states
+    states = [str(state).replace("'", "") for state in dfa['states']]
+    start_state = str(dfa['start_state']).replace("'", "")
+    accept_states = [str(state).replace("'", "") for state in dfa['accept_states']]
+
+    # Convert transitions
+    transitions = {}
+    for key, value in dfa['transitions'].items():
+        new_key = str(key).replace("'", "")
+        transitions[new_key] = {k: str(v).replace("'", "") for k, v in value.items()}
+
+    # Create the converted dictionary
+    output = {
+        'states': states,
+        'alphabet': dfa['alphabet'],
+        'transitions': transitions,
+        'start_state': start_state,
+        'accept_states': accept_states
+    }
+
+    return output
