@@ -9,12 +9,12 @@ def epsilon_closure(states, transitions):
     while queue:
         current_state = queue.popleft()
 
-        if "ε" in transitions[current_state]:
-            for state in transitions[current_state]["ε"]:
+        if "e" in transitions[current_state]:
+            for state in transitions[current_state]["e"]:
                 if state not in epsilon_closure_set:
                     queue.append(state)
 
-            epsilon_closure_set.update(transitions[current_state]["ε"])
+            epsilon_closure_set.update(transitions[current_state]["e"])
 
     return tuple(sorted(list(epsilon_closure_set)))
 

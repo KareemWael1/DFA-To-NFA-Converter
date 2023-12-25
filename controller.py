@@ -15,7 +15,7 @@ def process_input(states, sigma, transitions, start_state, final_states):
     dfa_graph = get_graph(dfa)
     print(nfa_graph)
     print(dfa_graph)
-    return nfa_graph[0], nfa_graph[1], dfa_graph[0], dfa_graph[1]
+    return nfa_graph[0], nfa_graph[1], dfa_graph[0], dfa_graph[1], dfa
 
 
 def get_graph(automaton):

@@ -7,7 +7,7 @@ def get_next_states_from_one_state(curr_state, char, graph):
     while True:
         old = len(current_states)
         for node in graph:
-            if node[0][0] in current_states and 'E' in node[1]:
+            if node[0][0] in current_states and 'e' in node[1]:
                 current_states.add(node[0][1])
                 edges_used.add((node[0][0], node[0][1]))
         if old == len(current_states):
@@ -23,7 +23,7 @@ def get_next_states_from_one_state(curr_state, char, graph):
     while True:
         old = len(next_states)
         for node in graph:
-            if node[0][0] in next_states and 'E' in node[1]:
+            if node[0][0] in next_states and 'e' in node[1]:
                 next_states.add(node[0][1])
                 edges_used.add((node[0][0], node[0][1]))
         if old == len(next_states):
@@ -46,5 +46,3 @@ def get_next_states_from_set_of_states(curr_states, char, graph):
     print(next_states)
     print(edges_used)
     return edges_used, next_states
-
-
