@@ -16,7 +16,7 @@ def epsilon_closure(states, transitions):
 
             epsilon_closure_set.update(transitions[current_state]["e"])
 
-    return tuple(sorted(list(epsilon_closure_set)))
+    return sorted(list(epsilon_closure_set))
 
 
 def move(states, symbol, transitions):
@@ -26,7 +26,7 @@ def move(states, symbol, transitions):
         if symbol in transitions[state]:
             result.update(transitions[state][symbol])
 
-    return tuple(sorted(list(result)))
+    return sorted(list(result))
 
 
 def nfa_to_dfa(nfa):

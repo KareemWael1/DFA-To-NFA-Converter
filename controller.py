@@ -81,7 +81,7 @@ def extract_transitions(transition_lines):
 
 
 def process_output(dfa):
-    # Convert states, start_state, and accept_states
+    # Convert states, start_state, and accept_states and remove the comma resulting from the usage of tuples
     states = [str(state).replace("'", "") for state in dfa['states']]
     start_state = str(dfa['start_state']).replace("'", "")
     accept_states = [str(state).replace("'", "") for state in dfa['accept_states']]
