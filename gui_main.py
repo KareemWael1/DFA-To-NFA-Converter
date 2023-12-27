@@ -193,13 +193,17 @@ def dfa_description_window(root):
     new_window.title("DFA Definition")
 
     labels = ["States:", "Sigma:", "Start State:", "Final States:", "Transitions:"]
-    entry_texts = [dfa["states"], dfa["alphabet"], dfa["start_state"], dfa["accept_states"], dfa["transitions"]]
+    entry_texts = ['{ ' + str(dfa["states"]).strip('[]').replace('\'', '') + ' }',
+                   str(dfa["alphabet"]).replace('[', '{').replace(']', '}').replace('\'', ''),
+                   str(dfa["start_state"]).replace('\'', ''),
+                   '{ ' + str(dfa["accept_states"]).strip('[]').replace('\'', '') + ' }',
+                   controller.formalize_dfa_transitions(dfa["transitions"])]
 
     entry_fields = []
     for i, label_text in enumerate(labels):
         label = tk.Label(new_window, text=label_text, font=("Arial", 14))  # Increase font size
         label.grid(row=i, column=0, padx=10, pady=5)
-        entry_text = tk.Text(new_window, font=("Arial", 12), height=get_height(i, 5), width=30)
+        entry_text = tk.Text(new_window, font=("Arial", 12), height=get_height(i, 5), width=60)
         entry_text.insert(tk.END, entry_texts[i])
         entry_text.grid(row=i, column=1, padx=10, pady=5)
         entry_fields.append(entry_text)
