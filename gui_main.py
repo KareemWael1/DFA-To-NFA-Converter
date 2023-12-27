@@ -161,11 +161,13 @@ def nfa_description_window(root):
     new_window.title("NFA Definition")
 
     labels = ["States:", "Sigma:", "Start State:", "Final States:", "Transitions:"]
-    entry_texts = ["{q0, q1, q2}", "{0, 1}", "q0", "{q2}", "(q0, 0) = {q0}\n"
-                                                           "(q0, 1) = {q0, q1}\n"
-                                                           "(q1, 0) = {q2}\n"
-                                                           "(q1, 1) = {q2}\n"
-                                                           "(q2, 0) = {q2}"]
+    entry_texts = ["{q0, q1, q2}", "{0, 1}", "q0", "{q2}", "{\n"
+                                                           "    (q0, 0) = {q0}\n"
+                                                           "    (q0, 1) = {q0, q1}\n"
+                                                           "    (q1, 0) = {q2}\n"
+                                                           "    (q1, 1) = {q2}\n"
+                                                           "    (q2, 0) = {q2}\n"
+                                                           "}"]
 
     entry_fields = []
     for i, label_text in enumerate(labels):

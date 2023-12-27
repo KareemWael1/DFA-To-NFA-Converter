@@ -69,6 +69,9 @@ def extract_transitions(transition_lines):
 
     result = {}
     for line in transition_lines:
+        if not ('=' in line):
+            continue
+        line = line.strip()
         state_symbol, transitions = line.split(' = ')
         state, symbol = state_symbol.strip('()').split(', ')
         transitions = transitions.strip('{}')
