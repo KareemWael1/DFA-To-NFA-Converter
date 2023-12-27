@@ -145,7 +145,7 @@ def save_input(states_entry, sigma_entry, start_state_entry, final_state_entry, 
     draw_nfa(graph=nfa_graph, ax=ax2, canvas=canvas2, state=nfa_state)
 
     # draw the DFA
-    final(ax, canvas, dfa_state, dfa_graph)
+    draw_graph(ax, canvas, dfa_state, dfa_graph)
 
     # Show DFA description
     dfa_description_window(root)
@@ -224,8 +224,10 @@ def update_view(graph, ax, canvas, state):
             colors.append((0.1, 0.2, 0.5, 0.5))
         elif state[node] == 1:  # final
             colors.append('green')
-        else:  # start
+        elif state[node] == 2:  # start
             colors.append('red')
+        else:
+            colors.append('yellow')
 
     # Draw the directed graph with edge labels
     pos = nx.circular_layout(graph)
@@ -253,8 +255,10 @@ def trace(graph, state, ax, canvas, edge_colors):
             colors.append((0.1, 0.2, 0.5, 0.5))
         elif state[node] == 1:  # final
             colors.append('green')
-        else:  # start
+        elif state[node] == 2:  # start
             colors.append('red')
+        else:
+            colors.append('yellow')
 
     # Draw the directed graph with edge labels
     pos = nx.circular_layout(graph)
@@ -272,7 +276,7 @@ def trace(graph, state, ax, canvas, edge_colors):
     canvas.draw()
 
 
-def final(ax, canvas, state, graph_data):
+def draw_graph(ax, canvas, state, graph_data):
     graph = nx.DiGraph()
     for edge in graph_data:
         node = edge[0]
@@ -288,7 +292,7 @@ def final(ax, canvas, state, graph_data):
 
 
 def draw_nfa(graph, ax, canvas, state):
-    final(ax, canvas, state, graph)
+    draw_graph(ax, canvas, state, graph)
 
 
 def main():
