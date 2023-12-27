@@ -3,6 +3,16 @@ from collections import deque
 from NFA_testing import NFA_ex0, NFA_ex1, NFA_ex2, NFA_ex3
 
 def epsilon_closure(states, transitions):
+    """
+    Computes the epsilon closure of a set of states in a given NFA.
+
+    Parameters:
+    states (iterable): The set of states for which epsilon closure needs to be computed.
+    transitions (dict): The transition table of the NFA.
+
+    Returns:
+    tuple: The epsilon closure of the input states as a sorted tuple.
+    """
     epsilon_closure_set = set(states)
     queue = deque(states)
 
@@ -19,15 +29,49 @@ def epsilon_closure(states, transitions):
     return tuple(sorted(list(epsilon_closure_set)))
 
 def move(states, symbol, transitions):
-    result = set()
+        """
+        Returns the set of states that can be reached from the given set of states
+        using the specified symbol and transitions.
 
-    for state in states:
-        if symbol in transitions[state]:
-            result.update(transitions[state][symbol])
+        Parameters:
+        - states (tuple): The set of states to move from.
+        - symbol (str): The symbol to use for the transition.
+        - transitions (dict): The dictionary representing the transitions between states.
 
-    return tuple(sorted(list(result)))
+        Returns:
+        - tuple: The set of states that can be reached from the given set of states
+            using the specified symbol and transitions.
+        """
+        
+        result = set()
+
+        for state in states:
+                if symbol in transitions[state]:
+                        result.update(transitions[state][symbol])
+
+        return tuple(sorted(list(result)))
 
 def nfa_to_dfa(nfa):
+    """
+    Converts a given NFA (Non-Deterministic Finite Automaton) to a DFA (Deterministic Finite Automaton).
+
+    Args:
+        nfa (dict): The NFA represented as a dictionary with the following keys:
+            - "states": List of states in the NFA.
+            - "alphabet": List of symbols in the input alphabet.
+            - "transitions": Dictionary representing the transition function of the NFA.
+            - "start_state": The start state of the NFA.
+            - "accept_states": List of accept states in the NFA.
+
+    Returns:
+        dict: The resulting DFA (Deterministic Finite Automaton) represented as a dictionary with the following keys:
+            - "states": List of states in the DFA.
+            - "alphabet": List of symbols in the input alphabet.
+            - "transitions": Dictionary representing the transition function of the DFA.
+            - "start_state": The start state of the DFA.
+            - "accept_states": List of accept states in the DFA.
+    """
+    
     # Print the original NFA
     print("\nOriginal NFA:")
     print(json.dumps(nfa, indent=2))
