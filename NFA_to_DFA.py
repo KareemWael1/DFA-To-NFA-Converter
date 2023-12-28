@@ -3,6 +3,16 @@ from NFA_testing import NFA_ex0, NFA_ex1, NFA_ex2, NFA_ex3, NFA_ex4
 
 
 def epsilon_closure(states, transitions):
+    """
+    Computes the epsilon closure of a set of states in a given NFA.
+
+    Parameters:
+    states (iterable): The set of states for which epsilon closure needs to be computed.
+    transitions (dict): The transition table of the NFA.
+
+    Returns:
+    tuple: The epsilon closure of the input states as a sorted tuple.
+    """
     epsilon_closure_set = set(states)
     queue = deque(states)
 
@@ -20,14 +30,27 @@ def epsilon_closure(states, transitions):
 
 
 def move(states, symbol, transitions):
-    result = set()
+        """
+        Returns the set of states that can be reached from the given set of states
+        using the specified symbol and transitions.
 
-    for state in states:
-        if symbol in transitions[state]:
-            result.update(transitions[state][symbol])
+        Parameters:
+        - states (tuple): The set of states to move from.
+        - symbol (str): The symbol to use for the transition.
+        - transitions (dict): The dictionary representing the transitions between states.
+
+        Returns:
+        - tuple: The set of states that can be reached from the given set of states
+            using the specified symbol and transitions.
+        """
+        
+        result = set()
+
+        for state in states:
+                if symbol in transitions[state]:
+                        result.update(transitions[state][symbol])
 
     return sorted(list(result))
-
 
 def nfa_to_dfa(nfa):
     dfa_states = []
