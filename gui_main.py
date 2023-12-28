@@ -40,11 +40,13 @@ def save_and_display_text(root):
         global char_counter, ax, canvas, ret, curr_state
         global dfa_graph, curr_states_nfa
         edge_idx = -1
-
+        # state to be colored in the DFA
+        color_map_dfa = {}
         for idx, data in enumerate(dfa_graph):
             if data[0][0] == curr_state and input_text[end - 1] in data[1]:
                 edge_idx = idx
-                curr_state = data[0][1]
+                curr_state = data[0][1] # data[0][1] is the next state it has to get high opacity
+                color_map_dfa[curr_state] = 0.8
                 break
         edge_colors = []
         for i in range(len(dfa_graph)):
@@ -79,14 +81,16 @@ def save_and_display_text(root):
         edges, nxt_states = nfa.get_next_states_from_set_of_states(curr_states_nfa, input_text[end - 1], nfa_graph)
         curr_states_nfa = nxt_states
         edge_colors_nfa = []
+        color_map_nfa = {}
         for node in graph_nfa.edges:
             if (node[0], node[1]) in edges:
                 edge_colors_nfa.append('red')
+                color_map_nfa[node[1]] = 0.8
             else:
                 edge_colors_nfa.append('black')
 
-        trace(graph, dfa_state, ax, canvas, edge_colors)
-        trace(graph_nfa, nfa_state, ax2, canvas2, edge_colors_nfa)
+        trace(graph, dfa_state, ax, canvas, edge_colors,color_map_dfa)
+        trace(graph_nfa, nfa_state, ax2, canvas2, edge_colors_nfa,color_map_nfa)
         char_counter = 1 + char_counter
         highlight_text(tag_name='tag1', lineno=1, start_char=0, end_char=end, fg_color='red')
 
@@ -250,7 +254,7 @@ def update_view(graph, ax, canvas, state):
     canvas.draw()
 
 
-def trace(graph, state, ax, canvas, edge_colors):
+def trace(graph, state, ax, canvas, edge_colors,color_map):
     # global ax, canvas  # Access the ax and canvas variables from the global scope
     # Clear the previous plot
     ax.clear()
@@ -258,13 +262,25 @@ def trace(graph, state, ax, canvas, edge_colors):
     colors = []
     for node in graph.nodes:
         if state[node] == 0:  # normal
-            colors.append((0.1, 0.2, 0.5, 0.5))
+            if node in color_map.keys():
+                colors.append((0.1, 0.2, 0.5, color_map[node]))  # RGBA format with opacity
+            else:
+                colors.append((0.1, 0.2, 0.5, 0.2)) # RGBA format with opacity
         elif state[node] == 1:  # final
-            colors.append('green')
+            if node in color_map.keys():
+                colors.append((0, 1, 0, color_map[node]))
+            else:
+                colors.append((0, 1, 0, 0.2))  # Green color with opacity
         elif state[node] == 2:  # start
-            colors.append('red')
+            if node in color_map.keys():
+                colors.append((1, 0, 0, color_map[node]))
+            else:
+                colors.append((1, 0, 0, 0.2))  # Red color with opacity
         else:
-            colors.append('yellow')
+            if node in color_map.keys():
+                colors.append((1, 1, 0, color_map[node]))
+            else:
+                colors.append((1, 1, 0, 0.2))  # Yellow color with opacity
 
     # Draw the directed graph with edge labels
     pos = nx.circular_layout(graph)
