@@ -4,9 +4,9 @@ import NFA_to_DFA
 def process_input(states, sigma, transitions, start_state, final_states):
     nfa = {"states": states.strip('{}').split(', '),
            "alphabet": sigma.strip('{}').split(', '),
-           "transitions": extract_transitions(transitions),
            "start_state": start_state,
            "accept_states": final_states.strip('{}').split(', ')}
+    nfa["transitions"] = extract_transitions(transitions, nfa["alphabet"], nfa["states"])
     print(nfa)
     dfa = NFA_to_DFA.nfa_to_dfa(nfa)
     dfa = process_output(dfa)
@@ -64,10 +64,17 @@ def get_graph(automaton):
     return final_output, states
 
 
-def extract_transitions(transition_lines):
+def extract_transitions(transition_lines, alphabet, states):
     transition_lines = transition_lines.strip().split('\n')
 
+    # Initialize transitions
     result = {}
+    for state in states:
+        result[state] = {}
+        for symbol in alphabet:
+            result[state][symbol] = []
+
+    # Extract transitions
     for line in transition_lines:
         if not ('=' in line):
             continue
