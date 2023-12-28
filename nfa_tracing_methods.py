@@ -43,6 +43,4 @@ def get_next_states_from_set_of_states(curr_states, char, graph):
         e, s = get_next_states_from_one_state(state, char, graph)
         next_states.update(s)
         edges_used.update(e)
-    print(next_states)
-    print(edges_used)
     return edges_used, next_states
