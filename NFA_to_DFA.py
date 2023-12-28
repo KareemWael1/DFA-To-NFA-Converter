@@ -30,27 +30,28 @@ def epsilon_closure(states, transitions):
 
 
 def move(states, symbol, transitions):
-        """
-        Returns the set of states that can be reached from the given set of states
+    """
+    Returns the set of states that can be reached from the given set of states
+    using the specified symbol and transitions.
+
+    Parameters:
+    - states (tuple): The set of states to move from.
+    - symbol (str): The symbol to use for the transition.
+    - transitions (dict): The dictionary representing the transitions between states.
+
+    Returns:
+    - tuple: The set of states that can be reached from the given set of states
         using the specified symbol and transitions.
+    """
 
-        Parameters:
-        - states (tuple): The set of states to move from.
-        - symbol (str): The symbol to use for the transition.
-        - transitions (dict): The dictionary representing the transitions between states.
+    result = set()
 
-        Returns:
-        - tuple: The set of states that can be reached from the given set of states
-            using the specified symbol and transitions.
-        """
-        
-        result = set()
-
-        for state in states:
-                if symbol in transitions[state]:
-                        result.update(transitions[state][symbol])
+    for state in states:
+        if symbol in transitions[state]:
+            result.update(transitions[state][symbol])
 
     return sorted(list(result))
+
 
 def nfa_to_dfa(nfa):
     dfa_states = []
@@ -78,6 +79,18 @@ def nfa_to_dfa(nfa):
 
                 if next_states not in dfa_states:
                     queue.append(next_states)
+            else:
+                # Create a dead state if no next state is found
+                if current_states_str not in dfa_transitions:
+                    dfa_transitions[current_states_str] = {}
+
+                dfa_transitions[current_states_str][symbol] = "[dead]"
+
+                if ['dead'] not in dfa_states:
+                    dfa_states.append(["dead"])
+                    dfa_transitions["[dead]"] = {}
+                    for letter in nfa["alphabet"]:
+                        dfa_transitions["[dead]"][letter] = ["dead"]
 
     dfa_accept_states = [state for state in dfa_states if any(s in nfa["accept_states"] for s in state)]
 

@@ -119,6 +119,7 @@ def formalize_dfa_transitions(transitions):
     output_transitions = "{\n"
     for state, value in transitions.items():
         for sub_key, sub_value in value.items():
-            output_transitions += "    ({}, {}) = {{{}}},\n".format(state, sub_key, sub_value.strip('{}').replace(',', ', '))
+            output_transitions += "    ({}, {}) = {{{}}},\n".format(state, sub_key, sub_value.strip('{}')
+                                                                    .replace(',', ', '))
     output_transitions = output_transitions[:-2] + "\n}"
     return output_transitions
